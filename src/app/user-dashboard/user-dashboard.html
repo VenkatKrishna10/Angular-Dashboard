@@ -1,0 +1,103 @@
+<div class="grid grid-cols-1 gap-5 p-5 xl:grid-cols-2">
+  <div class="rounded-lg bg-white p-5 shadow">
+    <div class="mb-5 flex items-center justify-between gap-4">
+      <h2 class="m-0 text-xl font-semibold text-[#383838]">User List</h2>
+      <button class="h-12 rounded-[5px] bg-[#1c4980] px-5 py-2.5 text-base font-medium text-white transition hover:bg-[#153a66] focus:outline-none focus:ring-2 focus:ring-[#1c4980] focus:ring-offset-2" (click)="showModal()">Add User</button>
+    </div>
+    <div class="mb-4 grid gap-3 md:grid-cols-[1fr_180px]">
+      <input
+        class="h-12 rounded-[5px] border border-[#ccc] px-3 text-base outline-none transition focus:border-[#1c4980] focus:ring-2 focus:ring-[#1c4980]/20"
+        type="search"
+        placeholder="Search users"
+        [value]="searchTerm"
+        (input)="onSearchChange($any($event.target).value)"
+      >
+      <select
+        class="h-12 rounded-[5px] border border-[#ccc] px-3 text-base outline-none transition focus:border-[#1c4980] focus:ring-2 focus:ring-[#1c4980]/20"
+        [value]="roleFilter"
+        (change)="onRoleFilterChange($any($event.target).value)"
+      >
+        <option value="All">All roles</option>
+        <option value="Admin">Admin</option>
+        <option value="Editor">Editor</option>
+        <option value="Viewer">Viewer</option>
+      </select>
+    </div>
+    <div class="overflow-x-auto">
+    <table class="w-full border-collapse">
+      <thead>
+        <tr>
+          <th class="border-b border-[#ddd] bg-[#f2f2f2] p-3 text-left font-semibold text-[#383838]">Name</th>
+          <th class="border-b border-[#ddd] bg-[#f2f2f2] p-3 text-left font-semibold text-[#383838]">Email</th>
+          <th class="border-b border-[#ddd] bg-[#f2f2f2] p-3 text-left font-semibold text-[#383838]">Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of paginatedUsers">
+          <td class="border-b border-[#ddd] p-3 text-left">{{ user.name }}</td>
+          <td class="border-b border-[#ddd] p-3 text-left">{{ user.email }}</td>
+          <td class="group border-b border-[#ddd] p-3 text-left">
+            <div class="grid min-h-12 w-[210px] grid-cols-[160px_36px] items-center gap-2">
+              <ng-container *ngIf="editingUser !== user; else editRole">
+                <span class="truncate">{{ user.role }}</span>
+                <button
+                  class="h-9 w-9 items-center rounded-[5px] text-[#0e141b] opacity-0 transition focus:opacity-100 group-hover:opacity-100"
+                  type="button"
+                  aria-label="Edit role"
+                  (click)="startRoleEdit(user)"
+                >
+                  <span class="material-symbols-outlined text-[22px] leading-none">edit_square</span>
+                </button>
+              </ng-container>
+              <ng-template #editRole>
+                <select
+                  class="h-12 w-40 rounded-[5px] border border-[#ccc] px-2 text-base outline-none transition focus:border-[#1c4980] focus:ring-2 focus:ring-[#1c4980]/20"
+                  [value]="selectedRole"
+                  (change)="saveRoleSelection(user, $any($event.target).value)"
+                >
+                  <option *ngFor="let role of roleOptions" [value]="role">{{ role }}</option>
+                </select>
+                <button
+                  class="flex h-9 w-9 items-center justify-center rounded-[5px] text-[#383838] transition hover:bg-[#383838]/10"
+                  type="button"
+                  aria-label="Cancel role edit"
+                  (click)="cancelRoleEdit()"
+                >
+                  <span class="material-symbols-outlined text-[22px] leading-none">close_small</span>
+                </button>
+              </ng-template>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="paginatedUsers.length === 0">
+          <td class="border-b border-[#ddd] p-4 text-center text-[#383838]" colspan="3">No users found</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="mt-4 flex flex-col items-center justify-between gap-3 text-sm text-[#383838] sm:flex-row">
+      <span>Showing {{ paginatedUsers.length }} of {{ filteredUsers.length }} users</span>
+      <div class="flex items-center gap-2">
+        <button class="h-10 rounded-[5px] bg-[#383838] px-3 text-white transition hover:bg-[#252525] disabled:cursor-not-allowed disabled:bg-[#ccc]" type="button" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">Previous</button>
+        <span class="min-w-20 text-center">Page {{ currentPage }} / {{ totalPages }}</span>
+        <button class="h-10 rounded-[5px] bg-[#383838] px-3 text-white transition hover:bg-[#252525] disabled:cursor-not-allowed disabled:bg-[#ccc]" type="button" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">Next</button>
+      </div>
+    </div>
+  </div>
+  <div class="rounded-lg bg-white p-5 text-center shadow">
+    <h2 class="mt-0 text-xl font-semibold text-[#383838]">User Roles Distribution</h2>
+    <div class="flex min-h-[520px] items-center justify-center">
+      <div class="h-10 w-10 animate-spin rounded-full border-4 border-[#1c4980]/20 border-t-[#1c4980]" *ngIf="isChartLoading && !chart"></div>
+      <canvas class="mx-auto h-[460px] max-h-[460px] w-full max-w-[560px]" #chart></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="fixed inset-0 z-50 items-center justify-center bg-black/50 p-4" [class.flex]="isModalVisible" [class.hidden]="!isModalVisible">
+  <div class="w-full max-w-[400px] rounded-lg bg-white p-5 shadow-lg">
+    <div class="flex min-h-48 items-center justify-center" *ngIf="isFormLoading">
+      <div class="h-10 w-10 animate-spin rounded-full border-4 border-[#1c4980]/20 border-t-[#1c4980]"></div>
+    </div>
+    <ng-template #formHost></ng-template>
+  </div>
+</div>

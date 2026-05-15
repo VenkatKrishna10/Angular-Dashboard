@@ -1,0 +1,23 @@
+<form class="flex flex-col gap-[15px]" [formGroup]="userForm" (ngSubmit)="onSubmit()">
+  <h2 class="mt-0 text-center text-xl font-semibold text-[#383838]">Add New User</h2>
+  <div class="flex flex-col">
+    <label class="mb-[5px] text-[#383838]" for="name">Name</label>
+    <input class="h-12 rounded-[5px] border border-[#ccc] px-2.5 py-2 text-base outline-none transition focus:border-[#1c4980] focus:ring-2 focus:ring-[#1c4980]/20" id="name" formControlName="name" placeholder="Enter name">
+  </div>
+  <div class="flex flex-col">
+    <label class="mb-[5px] text-[#383838]" for="email">Email</label>
+    <input class="h-12 rounded-[5px] border border-[#ccc] px-2.5 py-2 text-base outline-none transition focus:border-[#1c4980] focus:ring-2 focus:ring-[#1c4980]/20" id="email" type="email" formControlName="email" placeholder="Enter email">
+  </div>
+  <div class="flex flex-col">
+    <label class="mb-[5px] text-[#383838]" for="role">Role</label>
+    <select class="h-12 rounded-[5px] border border-[#ccc] px-2.5 py-2 text-base outline-none transition focus:border-[#1c4980] focus:ring-2 focus:ring-[#1c4980]/20" id="role" formControlName="role">
+      <option value="Admin">Admin</option>
+      <option value="Editor">Editor</option>
+      <option value="Viewer">Viewer</option>
+    </select>
+  </div>
+  <div class="mt-2.5 flex justify-end gap-2.5">
+    <button class="h-12 rounded-[5px] bg-[#1c4980] px-5 py-2.5 text-base font-medium text-white transition hover:bg-[#153a66] disabled:cursor-not-allowed disabled:bg-[#ccc]" type="submit" [disabled]="!userForm.valid">Add User</button>
+    <button class="h-12 rounded-[5px] bg-[#383838] px-5 py-2.5 text-base font-medium text-white transition hover:bg-[#252525]" type="button" (click)="onCancel()">Cancel</button>
+  </div>
+</form>
